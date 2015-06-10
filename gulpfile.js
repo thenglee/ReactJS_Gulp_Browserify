@@ -14,27 +14,54 @@ var path = {
 	DEST: 'dist'
 };
 
-function handleError(err) {
-  console.log(err.toString());
-  this.emit('end');
-};
 
+// Development tasks
 gulp.task('transform', function(){
-	return gulp.src(path.JS)
+	gulp.src(path.JS)
 		.pipe(react())
 		.on("error", console.log)
-		.pipe(gulp.dest(path.DEST_SRC))
+		.pipe(gulp.dest(path.DEST_SRC));
 });
 
 gulp.task('copy', function(){
-	return gulp.src(path.HTML)
+	gulp.src(path.HTML)
 		.pipe(gulp.dest(path.DEST))
-		.on("error", console.log)
+		.on("error", console.log);
 });
 
 gulp.task('watch', function(){
 	gulp.watch(path.ALL, ['transform', 'copy']);
 });
 
+
+// Production tasks
+
+gulp.task('build', function(){
+	gulp.src(path.JS)
+		.pipe(react())
+		.pipe(concat(path.MINIFIED_OUT))
+		.pipe(uglify(path.MINIFIED_OUT))
+		.pipe(gulp.dest(path.DEST_BUILD));
+});
+
+gulp.task('replaceHTML', function(){
+	gulp.src(path.HTML)
+		.pipe(htmlreplace({
+			'js': 'build/' + path.MINIFIED_OUT
+		}))
+		.pipe(gulp.dest(path.DEST));
+});
+
+
 gulp.task('default', ['watch']);
+
+gulp.task('production', ['replaceHTML', 'build']);
+
+
+
+
+
+
+
+
 
